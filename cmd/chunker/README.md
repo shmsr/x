@@ -14,5 +14,5 @@ go build
 ## Example
 Generates a slice with random elements (used a random number generator). By default 100000000 element are there in slice which is broken into 10 chunks and 10 goroutines are used to process them.
 ```sh
-chunkAdder 
+chunker
 ```

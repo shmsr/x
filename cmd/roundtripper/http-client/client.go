@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -14,38 +15,32 @@ import (
 	"time"
 )
 
-const (
-	rtick = 1 // request ticker (in s)
-	ctick = 5 // cache clear ticker (in s)
-)
-
-const (
-	flagHost   = "host"
-	flagPort   = "port"
-	flagScheme = "scheme"
-)
-
-const (
-	defaultHost   = "127.0.0.1"
-	defaultPort   = "8080"
-	defaultScheme = "http"
-)
-
-const (
-	usageHost   = "enter host"
-	usagePort   = "enter port"
-	usageScheme = "enter scheme"
-)
-
 var (
 	host   string
 	port   string
 	scheme string
 )
 
+const (
+	rtick = 1 // request ticker (in s)
+	ctick = 5 // cache clear ticker (in s)
+
+	flagHost   = "host"
+	flagPort   = "port"
+	flagScheme = "scheme"
+
+	defaultHost   = "127.0.0.1"
+	defaultPort   = "8080"
+	defaultScheme = "http"
+
+	usageHost   = "enter host"
+	usagePort   = "enter port"
+	usageScheme = "enter scheme"
+)
+
 func responseHandle(client *http.Client, req *http.Request) (string, error) {
 	resp, err := client.Do(req)
-	if err != nil && err.Error() != errInitCache {
+	if err != nil && !errors.Is(err, ErrInitCache) {
 		return "", err
 	}
 	defer resp.Body.Close()

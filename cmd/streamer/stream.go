@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -14,13 +15,14 @@ var r = flag.String(
 	"enter range [l,r] where l <= r in the format \"l,r\"",
 )
 
-type errs struct {
-	u string
-	w string
+// Error is custom error type
+type Error struct {
+	Op    string
+	Cause error
 }
 
-func (e errs) Error() string {
-	return fmt.Sprintf("Error in %s due to %s", e.u, e.w)
+func (e *Error) Error() string {
+	return fmt.Sprintf("Error in %s due to %v", e.Op, e.Cause)
 }
 
 // streamOdd gets the next odd numbers and sends it ch, immdiately
@@ -55,23 +57,23 @@ func main() {
 	var rs []string
 	// Split the string by comma(s)
 	if rs = strings.Split(*r, ","); len(rs) != 2 {
-		log.Fatalln(errs{"flag range", "invalid arguments"})
+		log.Fatalln(&Error{"flag range", errors.New("invalid arguments")})
 	}
 
 	var err error
 	var lR, rR int
 	// Convert string to int
 	if lR, err = strconv.Atoi(rs[0]); err != nil {
-		log.Fatalln(errs{"lower bound", err.Error()})
+		log.Fatalln(&Error{"lower bound", err})
 	}
 	// Convert string to int
 	if rR, err = strconv.Atoi(rs[1]); err != nil {
-		log.Fatalln(errs{"upper bound", err.Error()})
+		log.Fatalln(&Error{"upper bound", err})
 	}
 
 	// Make channels
-	var cho = make(chan int, 1)
-	var che = make(chan int, 1)
+	cho := make(chan int, 1)
+	che := make(chan int, 1)
 
 	// Spawn goroutines
 	go streamOdd(lR, rR, cho)

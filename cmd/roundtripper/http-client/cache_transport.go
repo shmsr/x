@@ -9,13 +9,11 @@ import (
 	"sync"
 )
 
-const (
-	defaultCacheSize = 1000
-)
+const defaultCacheSize = 1000
 
-const (
-	errEmptyCache = "cache is empty"
-	errInitCache  = "cache is not initialized"
+var (
+	ErrEmptyCache = errors.New("cache is empty")
+	ErrInitCache  = errors.New("cache is not initialized")
 )
 
 type cacheTransport struct {
@@ -64,26 +62,24 @@ func (c *cacheTransport) initCache(size int64) {
 
 // Set makes a entry to the cache
 func (c *cacheTransport) Set(req *http.Request, value string) error {
-	c.cache.mu.RLock()
-	if c.cache.data == nil {
-		c.cache.mu.RUnlock()
-		return errors.New(errInitCache)
-	}
-	c.cache.mu.RUnlock()
 	c.cache.mu.Lock()
+	defer c.cache.mu.Unlock()
+	if c.cache.data == nil {
+		return ErrInitCache
+	}
 	c.cache.data[getRequestURL(req)] = value
-	c.cache.mu.Unlock()
 	return nil
 }
 
 // Get fetches a entry from cache, if available
 func (c *cacheTransport) Get(req *http.Request) (string, error) {
 	c.cache.mu.RLock()
-	defer c.cache.mu.RUnlock()
-	if v, ok := c.cache.data[getRequestURL(req)]; ok {
+	v, ok := c.cache.data[getRequestURL(req)]
+	c.cache.mu.RUnlock()
+	if ok {
 		return v, nil
 	}
-	return "", errors.New(errEmptyCache)
+	return "", ErrEmptyCache
 }
 
 // Detaches from older references and points to newly allocated map
@@ -120,7 +116,7 @@ func (c *cacheTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	if err := c.Set(req, string(buf)); err != nil {
-		// In case of error adding entry to cache; response is successfuly
+		// In case of error adding entry to cache; response is successfully
 		// returned but with an error
 		return resp, err
 	}

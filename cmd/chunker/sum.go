@@ -23,8 +23,8 @@ func chunkSum(s []int64, c chan<- int64) {
 // chunker chunks the slice and spawns goroutines
 // for each of the chunk to processed by chunkSum
 func chunker(slice []int64, chunks int) int64 {
-	var length = len(slice)
-	var collector = make(chan int64, chunks)
+	length := len(slice)
+	collector := make(chan int64, chunks)
 	// If the length of slice if lesser than chunks, then don't chunk
 	if length < chunks {
 		go chunkSum(slice, collector)
@@ -32,9 +32,9 @@ func chunker(slice []int64, chunks int) int64 {
 	}
 
 	// Chunk and add until end doesn't reach boundary
-	var buckets = length / chunks
-	var begin = 0
-	var end = buckets
+	buckets := length / chunks
+	begin := 0
+	end := buckets
 	for end <= length {
 		go chunkSum(slice[begin:end], collector)
 		begin = end
@@ -42,14 +42,14 @@ func chunker(slice []int64, chunks int) int64 {
 	}
 
 	// If some elements in the slice are still left
-	var routine int
+	routine := 0
 	if length%chunks != 0 {
 		routine++
 		go chunkSum(slice[begin:], collector)
 	}
 
-	// Recieve from every goroutine
-	var sum int64 = 0
+	// Receive from every goroutine
+	var sum int64
 	for i := 0; i < chunks+routine; i++ {
 		sum += <-collector
 	}

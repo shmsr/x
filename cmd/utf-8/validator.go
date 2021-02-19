@@ -17,19 +17,17 @@ import (
 // performed.
 
 var (
-	filePath   string
+	path       string
 	vMeta      bool
 	runeMapper bool
 )
 
 const (
-	usageFilePath   = "<string>: mention filename"
+	usagePath       = "<string>: mention filename"
 	usageVMeta      = "<bool>: enable verbose offset mode to print line, line number, offset in case of error (first error)"
 	usageRuneMapper = "<bool>: enable mapper mode to print occurrence of every character (rune) on successful parsing"
-)
 
-const (
-	defaultFilePath   = ""
+	defaultPath       = ""
 	defaultVMeta      = false
 	defaultRuneMapper = false
 )
@@ -113,7 +111,8 @@ func advancedValidator(file *os.File) error {
 }
 
 func byteLineFinder(file *os.File, find int64) (string, int64, error) {
-	if _, err := file.Seek(0, 0); err != nil {
+	_, err := file.Seek(0, 0)
+	if err != nil {
 		return "", 0, err
 	}
 
@@ -131,31 +130,31 @@ func byteLineFinder(file *os.File, find int64) (string, int64, error) {
 		line++
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return "", 0, err
 	}
 	return "", line, nil
 }
 
 func main() {
-	flag.StringVar(&filePath, "file", defaultFilePath, usageFilePath)
+	flag.StringVar(&path, "file", defaultPath, usagePath)
 	flag.BoolVar(&vMeta, "v", defaultVMeta, usageVMeta)
 	flag.BoolVar(&runeMapper, "m", defaultRuneMapper, usageRuneMapper)
 	flag.Parse()
 
-	if filePath == "" {
+	if path == "" {
 		log.Fatalln(flag.ErrHelp.Error() + ". Try (-h) or (--help) flag")
 	}
 
-	file, err := os.Open(filePath)
+	file, err := os.Open(path)
 	fatalln(err)
 
-	switch vMeta {
-	case true:
+	if vMeta {
 		err := advancedValidator(file)
 		fatalln(err)
-	case false:
-		err := basicValidator(file)
-		fatalln(err)
+		return
 	}
+
+	err = basicValidator(file)
+	fatalln(err)
 }

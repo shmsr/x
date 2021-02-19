@@ -58,7 +58,7 @@ func AddMP3Songs(cfg *ini.File, songs []string, s map[int]Song) {
 
 // Buttons function listens for inputs from the user.
 func Buttons(control chan<- int) {
-	var pressed = ""
+	pressed := ""
 	for {
 		fmt.Scanln(&pressed)
 		switch pressed {
@@ -82,8 +82,8 @@ func Buttons(control chan<- int) {
 // Play controls the play/pause for songs
 func Play(name string, d time.Duration, controlCh chan<- int, pauseCh, stopCh <-chan bool, durationLeftCh chan<- int) {
 	fmt.Printf("P: Playing song: %s, seek: %v\n", name, int(d.Seconds()))
-	var tick = time.NewTicker(1 * time.Second)
-	var duration = int(d.Seconds())
+	tick := time.NewTicker(1 * time.Second)
+	duration := int(d.Seconds())
 	for {
 		select {
 		case <-tick.C:
@@ -216,7 +216,7 @@ func main() {
 
 	if !internalPlaylist {
 		// Read from the configuration file
-		var songs = cfg.Section("songs").KeyStrings()
+		songs := cfg.Section("songs").KeyStrings()
 		mp3.Songs = make(map[int]Song, len(songs))
 		AddMP3Songs(cfg, songs, mp3.Songs)
 	} else {

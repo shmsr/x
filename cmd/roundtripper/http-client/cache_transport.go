@@ -107,14 +107,17 @@ func (c *cacheTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if v, err := c.Get(req); err == nil {
 		return getCachedResponse([]byte(v), req)
 	}
+
 	resp, err := c.rt.RoundTrip(req)
 	if err != nil {
 		return nil, err
 	}
+
 	buf, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		return nil, err
 	}
+
 	if err := c.Set(req, string(buf)); err != nil {
 		// In case of error adding entry to cache; response is successfully
 		// returned but with an error

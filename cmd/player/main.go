@@ -74,7 +74,7 @@ func Buttons(control chan<- int) {
 			control <- exit
 			return
 		default:
-			fmt.Printf("P: Available controls: [play, pause, prev, next, exit]\n")
+			fmt.Println("P: Available controls: [play, pause, prev, next, exit]")
 		}
 	}
 }
@@ -91,7 +91,7 @@ func Play(name string, d time.Duration, controlCh chan<- int, pauseCh, stopCh <-
 			if duration <= 0 {
 				controlCh <- stop
 				tick.Stop()
-				fmt.Printf("P: Finished song: %s\n", name)
+				fmt.Println("P: Finished song:", name)
 				return
 			}
 		case p, ok := <-pauseCh:
@@ -138,7 +138,7 @@ func MusicPlayerController(mp3 MP3Player, control chan int) {
 					mp3.channel.chanDurationLeft,
 				)
 			} else {
-				fmt.Printf("P: Song is already playing\n")
+				fmt.Println("P: Song is already playing")
 			}
 		// Pause
 		case pause:
@@ -146,9 +146,9 @@ func MusicPlayerController(mp3 MP3Player, control chan int) {
 				mp3.Play = false
 				mp3.channel.pause <- true
 				mp3.DurationLeft = <-mp3.channel.chanDurationLeft
-				fmt.Printf("P: Paused at seek: %v\n", mp3.DurationLeft)
+				fmt.Println("P: Paused at seek:", mp3.DurationLeft)
 			} else {
-				fmt.Printf("P: No song is playing, currently\n")
+				fmt.Println("P: No song is playing, currently")
 			}
 		// Previous
 		case previous:
@@ -164,7 +164,7 @@ func MusicPlayerController(mp3 MP3Player, control chan int) {
 				mp3.Play = false
 				control <- play
 			}
-			fmt.Printf("P: Select previous song: %s\n", mp3.Songs[mp3.Playing].Name)
+			fmt.Println("P: Select previous song:", mp3.Songs[mp3.Playing].Name)
 		// Next
 		case next:
 			switch mp3.Playing {
@@ -179,7 +179,7 @@ func MusicPlayerController(mp3 MP3Player, control chan int) {
 				mp3.Play = false
 				control <- play
 			}
-			fmt.Printf("P: Select next song: %s\n", mp3.Songs[mp3.Playing].Name)
+			fmt.Println("P: Select next song:", mp3.Songs[mp3.Playing].Name)
 		// Stop (Finished Playing)
 		case stop:
 			mp3.Play = false
@@ -190,7 +190,7 @@ func MusicPlayerController(mp3 MP3Player, control chan int) {
 			close(mp3.channel.stop)
 			close(mp3.channel.pause)
 			close(mp3.channel.chanDurationLeft)
-			fmt.Printf("P: Exit\n")
+			fmt.Println("P: Exit")
 			return
 		}
 	}
@@ -232,7 +232,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Printf("P: Playlist:\n")
+	fmt.Println("P: Playlist:")
 	for i := 1; i <= len(mp3.Songs); i++ {
 		fmt.Println(mp3.Songs[i])
 	}
